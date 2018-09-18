@@ -26,7 +26,6 @@ import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.model.config.GormProperties
 import org.grails.datastore.mapping.proxy.EntityProxy
-import org.grails.datastore.mapping.reflect.EntityReflector
 import org.grails.datastore.mapping.reflect.NameUtils
 import org.hibernate.proxy.HibernateProxy
 import org.springframework.beans.PropertyAccessorFactory
@@ -110,7 +109,6 @@ class HibernateUtils {
             String setterName = NameUtils.getSetterName(propertyName)
 
             GroovyObject mc = (GroovyObject)entity.javaClass.metaClass
-            EntityReflector reflector = entity.getReflector()
 
             mc.setProperty(getterName, {->
                 def thisObject = getDelegate()
@@ -119,7 +117,7 @@ class HibernateUtils {
                     entityProxy.initialize()
                     thisObject = entityProxy.getTarget()
                 }
-                def propertyValue = reflector.getProperty(thisObject, propertyName)
+                def propertyValue = PropertyAccessorFactory.forBeanPropertyAccess(thisObject).getPropertyValue(propertyName)
                 if (propertyValue instanceof HibernateProxy) {
                     propertyValue = GrailsHibernateUtil.unwrapProxy(propertyValue)
                 }
